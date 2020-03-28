@@ -186,11 +186,11 @@ namespace ConsoleApp1
             
         }
 
-        public static List<int[,]> splitWithOnes(int[,] matrix, int dim)
-        {
+        //public static List<int[,]> splitWithOnes(int[,] matrix, int dim)
+        //{
             
 
-        }
+        //}
 
 
     }
