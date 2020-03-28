@@ -174,22 +174,103 @@ namespace ConsoleApp1
             }
             // [A] needs to have dimensions that are the number of possible elements x number of possible elements
             //[B] needs to have dimensoins that are the 1 x the number of elements
+            int[,] A = new int[matDim,matDim];
+            int[,] B = new int[matDim,1];
             if (matDim == otherDim)
             {
-                splitWithOnes(Matrix, otherDim);
+                List<int[,]> matricies = splitWithOnes(Matrix, otherDim);
+                 A = matricies[0];
+                 B = matricies[1];
             }
 
             if (matDim == otherDim + 1)
             {
-                
+                splitWithoutOnes(Matrix,otherDim);
             }
-            
+            Console.WriteLine("----------------------");
+            for(int i=0; i<matDim;)
+            {
+                Console.WriteLine("");
+                for(int j=0; j<matDim;)
+                {
+                    Console.Write(A[i, j] + " ");
+                    j++;
+                }
+
+                i++;
+            }
+            Console.WriteLine("------------------");
+            for(int i=0; i<matDim;)
+            {
+                Console.WriteLine("");
+                for(int j=0; j<1;)
+                {
+                    Console.Write(B[i, j] + " ");
+                    j++;
+                }
+
+                i++;
+            }
         }
 
         public static List<int[,]> splitWithOnes(int[,] matrix, int dim)
         {
-            
+            //dim = dim - 1;
+            int[,] A = new int[dim, dim];
+            int[,] B = new int[dim, 1];
 
+            for(int i=0; i<dim;)
+            {
+                Console.WriteLine("");
+                for(int j=0; j<dim;)
+                { 
+                    if(j<dim-1)
+                    {
+                        A[i, j] = matrix[i, j];
+                    }
+                    else
+                    {
+                        A[i, j] = 1;
+                        B[i, 0] = matrix[i, j];
+                    }
+                    j++;
+                }
+
+                i++;
+            }            
+            List<int[,]> matricies = new List<int[,]>();
+            matricies.Add(A);
+            matricies.Add(B);
+            return matricies;
+        }
+        public static List<int[,]> splitWithoutOnes(int[,] matrix, int dim)
+        {
+            dim = dim - 1;
+            int[,] A = new int[dim, dim];
+            int[,] B = new int[dim, 1];
+
+            for(int i=0; i<dim;)
+            {
+                Console.WriteLine("");
+                for(int j=0; j<dim;)
+                { 
+                    if(j<dim-1)
+                    {
+                        A[i, j] = matrix[i, j];
+                    }
+                    else
+                    {
+                        B[i, 0] = matrix[i, j];
+                    }
+                    j++;
+                }
+
+                i++;
+            }            
+            List<int[,]> matricies = new List<int[,]>();
+            matricies.Add(A);
+            matricies.Add(B);
+            return matricies;
         }
 
 
