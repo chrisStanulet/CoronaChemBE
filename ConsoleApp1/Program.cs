@@ -41,7 +41,51 @@ namespace ConsoleApp1
              e3                         |
              e4                         |                            
              */
-            Balence(Terms, termNum);
+
+            int[] answer = Balence(Terms, termNum);
+            int i = 0;
+            Console.Write(input + " balanced is: ");
+            
+            foreach (var v in terms1)
+            {
+                
+                if (answer[i] != 1)
+                {
+                    Console.Write(answer[i].ToString());
+                }
+
+                if (i < terms1.Length-1)
+                {
+                    Console.Write(v + " + ");
+                }
+                else
+                {
+                    Console.Write(v);
+                }
+
+                i++;
+            }
+            Console.Write(" = ");
+            i = 0;
+            foreach (var v in terms2)
+            {
+                
+                if (answer[i] != 1)
+                {
+                    Console.Write(answer[i].ToString());
+                }
+
+                if (i < terms1.Length-1)
+                {
+                    Console.Write(v + " + ");
+                }
+                else
+                {
+                    Console.Write(v);
+                }
+
+                i++;
+            }
         }
 
 
@@ -77,7 +121,7 @@ namespace ConsoleApp1
             return list1;
         }
 
-        public static void Balence(Dictionary<int, List<Element>> terms, int termnum)
+        public static int[] Balence(Dictionary<int, List<Element>> terms, int termnum)
         {
             Dictionary<int, List<Element>> Terms = terms;
             int termNum = termnum;
@@ -194,11 +238,26 @@ namespace ConsoleApp1
 
                 i++;
             }
-            double[] Answer = new double[otherDim];
+            int[] Answer = new int[otherDim];
             for (int i = 0; i < otherDim;i++)
             {
-                Answer[i] = answer[i][0];
+                if (answer[i][0] < 0)
+                {
+                    Answer[i] = (Convert.ToInt32(answer[i][0]))  * -1; 
+                }
+                else
+                {
+                Answer[i] = Convert.ToInt32(answer[i][0]);                    
+                }
             }
+
+            int GCD = findGCD(Answer, Answer.Length);
+            for (int i = 0; i < otherDim; i++)
+            {
+                Answer[i] = Answer[i] / GCD;
+            }
+
+            return Answer;
         }
 
         static int gcd(int a, int b)
