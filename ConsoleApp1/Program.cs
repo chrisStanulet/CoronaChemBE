@@ -194,6 +194,11 @@ namespace ConsoleApp1
 
                 i++;
             }
+            double[] Answer = new double[otherDim];
+            for (int i = 0; i < otherDim;i++)
+            {
+                Answer[i] = answer[i][0];
+            }
         }
 
         static int gcd(int a, int b)
