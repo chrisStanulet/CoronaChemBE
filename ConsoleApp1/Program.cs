@@ -2,20 +2,44 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
+using System.Diagnostics.Tracing;
 using System.Linq;
 using System.Numerics;
 using System.Text.RegularExpressions;
 
 namespace ConsoleApp1
 {
+    
     class Program
     {
+        private static List<string> ions = new List<string>
+        {
+            "H3O", "NH4", "NH3", "BrO3", "C2H3O2", "C23COO", "ClO", "ClO2", "ClO3", "ClO4", "CN", "HCO3", "H2PO4",
+            "HSO3", "HSO4", "IO3", "MnO4", "NO2", "NO3", "OH", "CO3", "CrO4", "Cr2O7", "C2O4", "HPO4", "SiO3", "SO3",
+            "SO4", "S2O3", "AsO4", "PO3", "PO4"
+        };
         public static void Main(string[] args)
         {
+            
+
+
             Dictionary<int, List<Element>> Terms = new Dictionary<int, List<Element>>();
             int termNum = 0;
-            string input = "Fe+AgNO3=Ag+Fe(NO3)3";
-            string[] halves = input.Split("=");
+            bool containsE = false;
+            Console.WriteLine("Enter the equation you want balanced. Separate the two sides with either a = or ->");
+            string input =Console.ReadLine();
+            input = input.Replace(" ", string.Empty);
+            string[] halves = new string[2];
+            if (input.Contains("="))
+            {
+                containsE = true;
+                 halves = input.Split("=");
+            }
+            else if (input.Contains("->"))
+            {
+                containsE = false;
+                 halves = input.Split("->");
+            }
             string eq1 = halves[0];
             string eq2 = halves[1];
             string[] terms1 = eq1.Split("+");
@@ -32,7 +56,13 @@ namespace ConsoleApp1
                 termNum++;
                 Terms.Add(termNum, getElements(v));
             }
-
+            //ELEMENTS INSIDE THE PARENTHESIS ARE DEPENDENT ON EACH OTHER SO IT CAN BE DISREGARDED 
+            //EX: in Na(SO4)3 the O can be disregarded making the matrix even
+            
+            
+            
+            
+            
 
             /* matrix is            [A] | [B]
                 term1    term2    term3 |   term4
@@ -65,8 +95,16 @@ namespace ConsoleApp1
 
                 i++;
             }
-            Console.Write(" = ");
-            i = 0;
+
+            if (containsE)
+            {
+                Console.Write(" = ");
+            }
+            else
+            {
+                Console.Write(" -> ");
+            }
+
             foreach (var v in terms2)
             {
                 
@@ -75,7 +113,7 @@ namespace ConsoleApp1
                     Console.Write(answer[i].ToString());
                 }
 
-                if (i < terms1.Length-1)
+                if (i < terms1.Length + terms2.Length -1)
                 {
                     Console.Write(v + " + ");
                 }
@@ -127,6 +165,12 @@ namespace ConsoleApp1
             int termNum = termnum;
             List<Element> elements = new List<Element>();
 
+            
+            List<int> throwAway = new List<int>();
+            foreach (var term in ions)
+            {
+                
+            }
 
             foreach (var v in terms)
             {
@@ -151,6 +195,12 @@ namespace ConsoleApp1
             double[,] Matrix = new double[otherDim, matDim];
             int column = 0;
             int row = 0;
+            
+            
+            
+            
+            
+            
             foreach (var e in elements) //going through each of the possible elements essentially the rows
             {
                 foreach (var t in terms) //going through thr element in each term essentially the columns
@@ -170,7 +220,7 @@ namespace ConsoleApp1
                                     token = suicide.Number;
                                 }
 
-                                if (column == matDim - 2)
+                                if (column == terms.Count - 2 && token > 0) 
                                 {
                                     token = token * (-1);
                                 }
@@ -197,8 +247,8 @@ namespace ConsoleApp1
 
             // [A] needs to have dimensions that are the number of possible elements x number of possible elements
             //[B] needs to have dimensoins that are the 1 x the number of elements
-            double[,] A = new double[matDim, matDim];
-            double[,] B = new double[matDim, 1];
+            double[,] A = new double[otherDim, otherDim];
+            double[,] B = new double[otherDim, 1];
             if (matDim == otherDim)
             {
                 List<double[,]> matrices = splitWithOnes(Matrix, otherDim);
@@ -206,12 +256,15 @@ namespace ConsoleApp1
                 B = matrices[1];
             }
 
-            if (matDim == otherDim + 1)
+            else if (matDim == otherDim + 1)
             {
-                splitWithoutOnes(Matrix, otherDim);
-                List<double[,]> matrices = splitWithOnes(Matrix, otherDim);
+                List<double[,]> matrices = splitWithoutOnes(Matrix, otherDim);
                 A = matrices[0];
                 B = matrices[1];
+            }
+            else
+            {
+                Console.WriteLine("Not able to be solved yet");
             }
 
             double[] array1 = ((double[,]) A).Cast<double>().ToArray();
@@ -238,41 +291,52 @@ namespace ConsoleApp1
 
                 i++;
             }
-            int[] Answer = new int[otherDim];
-            for (int i = 0; i < otherDim;i++)
+            int[] Answer = new int[termNum];
+            for (int i = 0; i < termnum;i++)
             {
-                if (answer[i][0] < 0)
+                if (i < otherDim)
                 {
-                    Answer[i] = (Convert.ToInt32(answer[i][0]))  * -1; 
+                    if (answer[i][0] < 0)
+                    {
+                        Answer[i] = (Convert.ToInt32(answer[i][0])) * -1;
+                    }
+                    else if (answer[i][0] > 0)
+                    {
+                        Answer[i] = Convert.ToInt32(answer[i][0]);
+                    }
                 }
-                else
+                else if(i==otherDim && matDim == otherDim+ 1)
                 {
-                Answer[i] = Convert.ToInt32(answer[i][0]);                    
+                    Answer[i] = Convert.ToInt32(MatrixDeterminant(jagged1));
+                    if (Answer[i] < 0)
+                    {
+                        Answer[i] = Answer[i] * -1;
+                    }
                 }
             }
 
-            int GCD = findGCD(Answer, Answer.Length);
-            for (int i = 0; i < otherDim; i++)
+            int gcd = FindGCD(Answer, Answer.Length);
+            for (int i = 0; i < termNum; i++)
             {
-                Answer[i] = Answer[i] / GCD;
+                Answer[i] = Answer[i] / gcd;
             }
 
             return Answer;
         }
 
-        static int gcd(int a, int b)
+        static int GCD(int a, int b)
         {
             if (a == 0)
                 return b;
-            return gcd(b % a, a);
+            return GCD(b % a, a);
         }
 
-        static int findGCD(int[] arr, int n)
+        static int FindGCD(int[] arr, int n)
         {
             int result = arr[0];
             for (int i = 1; i < n; i++)
             {
-                result = gcd(arr[i], result);
+                result = GCD(arr[i], result);
 
                 if (result == 1)
                 {
@@ -318,16 +382,15 @@ namespace ConsoleApp1
 
         public static List<double[,]> splitWithoutOnes(double[,] matrix, int dim)
         {
-            dim = dim - 1;
             double[,] A = new double[dim, dim];
             double[,] B = new double[dim, 1];
 
             for (int i = 0; i < dim;)
             {
                 Console.WriteLine("");
-                for (int j = 0; j < dim;)
+                for (int j = 0; j <= dim;)
                 {
-                    if (j < dim - 1)
+                    if (j < dim )
                     {
                         A[i, j] = matrix[i, j];
                     }
@@ -355,8 +418,7 @@ namespace ConsoleApp1
                 result[i] = new double[cols];
             return result;
         }
-
-
+        
         static double[][] MatrixIdentity(int n)
         {
             // return an n x n Identity matrix
@@ -366,9 +428,7 @@ namespace ConsoleApp1
 
             return result;
         }
-
-        // --------------------------------------------------
-
+        
         static string MatrixAsString(double[][] matrix, int dec)
         {
             string s = "";
@@ -381,8 +441,6 @@ namespace ConsoleApp1
 
             return s;
         }
-
-        // --------------------------------------------------
 
         static bool MatrixAreEqual(double[][] matrixA, double[][] matrixB, double epsilon)
         {
@@ -401,8 +459,6 @@ namespace ConsoleApp1
                     return false;
             return true;
         }
-
-        // --------------------------------------------------
 
         static double[][] MatrixProduct(double[][] matrixA, double[][] matrixB)
         {
@@ -431,7 +487,6 @@ namespace ConsoleApp1
             return result;
         }
 
-        // --------------------------------------------------
 
         static double[] MatrixVectorProduct(double[][] matrix, double[] vector)
         {
@@ -448,8 +503,6 @@ namespace ConsoleApp1
                 result[i] += matrix[i][j] * vector[j];
             return result;
         }
-
-        // --------------------------------------------------
 
         static double[][] MatrixDecompose(double[][] matrix, out int[] perm, out int toggle)
         {
@@ -560,9 +613,7 @@ namespace ConsoleApp1
 
             return result;
         } // MatrixDecompose
-
-        // --------------------------------------------------
-
+        
         static double[][] MatrixInverse(double[][] matrix)
         {
             int n = matrix.Length;
@@ -676,7 +727,7 @@ namespace ConsoleApp1
                 result[i][j] = matrix[i][j];
             return result;
         }
-
+        
         // --------------------------------------------------
     }
 }
